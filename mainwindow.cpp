@@ -13,6 +13,7 @@
 
 scanner *m_scan;
 char crlf[] = { 13, 10, 0};
+unsigned char version[] = {0,9,0};
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -196,12 +197,16 @@ void MainWindow::createMenus()
 
 void MainWindow::about()
 {
-    QMessageBox::about(this, tr("QtMirror"),
-                       tr("<b>QtMirror</b> est un logiciel open source\n"
-                        "de copies de sauvegardes multiplateforme\n"
-                        "développé par Stéphane Gaspar  - (2024)\n "
-                        "basé sur la bibliothèque Qt et sur 7zip de Igor Pavlov.\n "
-                        "contact : stephane.gaspar@laposte.net"));
+    QString s = tr("<b>QtMirror</b> est un logiciel open source\n"
+                   "de copies de sauvegardes multiplateforme\n"
+                   "développé par Stéphane Gaspar  - (2024)\n "
+                   "basé sur la bibliothèque Qt et sur 7zip de Igor Pavlov.\n "
+                   "contact : stephane.gaspar@gmail.com -");
+    QString v = tr(" version : %1.%2%3");
+    v = v.arg(version[0]).arg(version[1]).arg(version[2]);
+    s.append(v);
+
+    QMessageBox::about(this, "QtMirror", s );
 }
 
 void MainWindow::toggleSimul(int s)
