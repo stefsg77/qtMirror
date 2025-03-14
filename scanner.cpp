@@ -630,8 +630,11 @@ void scanner::compareListOfFiles()
             strcpy_s((char*)sfo.dest_path, MAX_PATH, (const char*)m_mc.szDestPath);
             sfo.iAction = m_vSFileO[i].iAction;
             sfo.modif_time = m_vSFileO[i].modif_time;
-            sfo.iFileNum = m_vSFileD[j].iRevision;
-            sfo.old_time = m_vSFileD[j].modif_time;
+            if(found)
+            {
+                sfo.iFileNum = m_vSFileD[j].iRevision;
+                sfo.old_time = m_vSFileD[j].modif_time;
+            }
             m_mw->putFileInfo(sfo);
         }
     }

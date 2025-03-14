@@ -79,8 +79,8 @@ typedef struct _sfileOutput{
     unsigned char full_name[ MAX_PATH ];
     unsigned char org_path[MAX_PATH];
     unsigned char dest_path[MAX_PATH];
-    int long long modif_time;
-    int long long old_time;
+    unsigned int long long modif_time;
+    unsigned int long long old_time;
     unsigned int attributes;
     int iAction;
     int iFileNum;
@@ -91,8 +91,8 @@ typedef struct _sfileOutput{
 // structure pour lister les fichiers à restaurer
 struct sfileR{
     unsigned char full_name[ MAXLENGTH ];
-    int long long creation_time;
-    int long long modif_time;
+    unsigned int long long creation_time;
+    unsigned int long long modif_time;
     int long long org_size;
     unsigned int attributes;
     unsigned int offset;
