@@ -5,6 +5,7 @@
 #include "QtMirror.h"
 //#include "lzhuf2.h"
 #include "entetefichier.h"
+#include "mainwindow.h"
 
 namespace Ui {
 class DialogListImage;
@@ -15,8 +16,9 @@ class DialogListImage : public QDialog
     Q_OBJECT
 
 public:
-    explicit DialogListImage(QString& fileName, QWidget *parent = 0);
+    explicit DialogListImage(QString& fileName, MainWindow *parent = 0);
     ~DialogListImage();
+    void selectLatest();
 public slots:
     void getImageName();
     void selectAll();
@@ -42,6 +44,7 @@ private:
     QStringList m_slSelect;
     QVector <struct sfileR> m_vSFileD;
     EnteteFichier *m_accesLecture7z;
+    MainWindow *m_mw;
 };
 
 #endif // DIALOGLISTIMAGE_H

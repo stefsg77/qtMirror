@@ -98,10 +98,10 @@ void ViewEditStudy::fillTable()
             cb->setCurrentIndex(m_Sfo[i].iAction);
             QTableWidgetItem *wi = new QTableWidgetItem((char*)m_Sfo[i].full_name);
             ui->tableWidget->setItem(j, 1, wi);
-            dt.setSecsSinceEpoch(m_Sfo[i].modif_time);
+            dt.setMSecsSinceEpoch(m_Sfo[i].modif_time);
             wi = new QTableWidgetItem(dt.toString("dd/MM/yyyy hh:mm"));
             ui->tableWidget->setItem(j, 2, wi);
-            dt.setSecsSinceEpoch(m_Sfo[i].old_time);
+            dt.setMSecsSinceEpoch(m_Sfo[i].old_time);
             wi = new QTableWidgetItem(dt.toString("dd/MM/yyyy hh:mm"));
             ui->tableWidget->setItem(j, 3, wi);
             wi = new QTableWidgetItem(QString("%1").arg(m_Sfo[i].iFileNum));

@@ -36,14 +36,15 @@ bool myCompareR(const sfileR &sf1, const sfileR &sf2)
     return bCmp;
 }
 
-DialogListImage::DialogListImage(QString &fileName, QWidget *parent) :
+DialogListImage::DialogListImage(QString &fileName, MainWindow *parent) :
     QDialog(parent),
     ui(new Ui::DialogListImage)
 {
     ui->setupUi(this);
     QStringList hList;
+    m_mw = parent;
     m_accesLecture7z = new EnteteFichier();
-    m_slSelect << tr("Aucune sélection") << tr("Tout sélectionner");
+    m_slSelect << tr("Aucune sélection") << tr("Tout sélectionner") << tr("Dernière versions");
     hList << tr("Action") << tr("Fichier") << tr("Date") << tr("V.");
     ui->tableWidget->setColumnCount(4);
     ui->tableWidget->setHorizontalHeaderLabels(hList);
@@ -95,6 +96,30 @@ DialogListImage::~DialogListImage()
     delete ui;
 }
 
+void DialogListImage::selectLatest()
+{
+    //pour chaque fichier, sélestionner le plus récent
+    int i;
+    int count = m_vSFileD.size();
+    QString fileName;
+    QString temp;
+    for(i = 0; i < count; i++)
+    {
+        temp = QString((char*)m_vSFileD.at(i).full_name);
+        if(temp != fileName)
+        {
+            if(i > 0)
+            {
+                QCheckBox *cb = (QCheckBox*)ui->tableWidget->cellWidget(i-1,0);
+                cb->setCheckState(Qt::Checked);
+            }
+            fileName = temp;
+        }
+    }
+    QCheckBox *cb = (QCheckBox*)ui->tableWidget->cellWidget(count-1,0);
+    cb->setCheckState(Qt::Checked);
+}
+
 void DialogListImage::getPath()
 {
     QString path = QFileDialog::getExistingDirectory(this, tr("QtMiroir"), QDir::homePath(),
@@ -125,6 +150,9 @@ void DialogListImage::comboChanged(int index)
             QCheckBox *cb = (QCheckBox*)ui->tableWidget->cellWidget(i,0);
             cb->setCheckState(Qt::Checked);
         }
+        break;
+    case 2:
+        selectLatest();
         break;
     default:
         for(i = 0; i < count; i++)
@@ -238,7 +266,6 @@ void DialogListImage::restoreSelected()
                 const Byte *filePtr = dataPtr + sfr.offset;
                 if((UInt64)(sfr.offset + sfr.org_size) <= m_accesLecture7z->packSize(0))
                 {
-                    struct utimbuf utb;
                     m_copied++;
                     destName = m_destPath;
                     destName.append(QString((const char*)sfr.full_name + lengthToRemove));
@@ -248,10 +275,17 @@ void DialogListImage::restoreSelected()
                     if( file.exists() )
                     {
                         QFileInfo qfi(file);
-                        if( overWrite || qfi.lastModified().toMSecsSinceEpoch() < sfr.modif_time)
+                        if( overWrite || (UInt64)qfi.lastModified().toMSecsSinceEpoch() < sfr.modif_time)
                             QFile::remove(destName);
                         else
                             break;
+                    }
+                    if(m_mw)
+                    {
+                        QString s = "Copie de ";
+                        s.append( (const char *)sfr.full_name);
+                        m_mw->putText(s);
+
                     }
                     res = file.open(QIODevice::ReadWrite);
                     //si erreure, tenter de créer le chemin
@@ -263,12 +297,10 @@ void DialogListImage::restoreSelected()
                         if( !res ) break;
                     }
                     file.write((char*)filePtr, sfr.org_size);
+                    QDateTime dt = QDateTime::fromMSecsSinceEpoch(sfr.modif_time);
+                    file.setFileTime(dt, QFileDevice::FileModificationTime);
 
                     file.close();
-                    // ICI LA QUESTION DE RETABLIR LE TIMESTAMP DU FICHIER----------------------------------
-                    utb.actime = (time_t)sfr.modif_time;
-                    utb.modtime = (time_t)sfr.modif_time;
-                    utime((const char*)destName.toUtf8().data(), &utb);
                 }
             }
         }
@@ -277,6 +309,7 @@ void DialogListImage::restoreSelected()
     }
     QList<QTableWidgetItem *> selectedList = ui->tableWidget->selectedItems();
     m_selected = selectedList.size();
+    ui->label_3->setText(tr("Opération terminée !"));
 }
 
 void DialogListImage::getImageName()

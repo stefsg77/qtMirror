@@ -1060,16 +1060,13 @@ void scanner::restoreFromImage7z()
             m_mw->putText(s);
             if( !m_simul && sf.iAction != NOTHING)
             {
-                struct utimbuf utb;
                 outFile.setFileName(QString((const char*)sf.full_name));
                 if( outFile.exists() ) QFile::remove((const char*)sf.full_name);
                 outFile.open(QIODevice::ReadWrite);
                 outFile.write((char*)adrData, sf.org_size);
+                QDateTime dt = QDateTime::fromMSecsSinceEpoch(sf.modif_time);
+                outFile.setFileTime(dt, QFileDevice::FileModificationTime);
                 outFile.close();
-                // ICI ETUDIER LA QUESTION DE RETABLIR LE TIMESTAMP DU FICHIER----------------------------------
-                utb.actime = (time_t)sf.modif_time;
-                utb.modtime = (time_t)sf.modif_time;
-                utime((const char*)sf.full_name, &utb);
             }
         }
     }

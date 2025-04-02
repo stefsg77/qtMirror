@@ -1,4 +1,4 @@
-#include <QtCore>
+//#include <QtCore>
 #include <QFileDialog>
 #include <QMessageBox>
 #include "mainwindow.h"
@@ -13,7 +13,7 @@
 
 scanner *m_scan;
 char crlf[] = { 13, 10, 0};
-unsigned char version[] = {0,9,0};
+const unsigned char version[] = {0,9,0};
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -197,16 +197,18 @@ void MainWindow::createMenus()
 
 void MainWindow::about()
 {
+    QMessageBox msgBox;
     QString s = tr("<b>QtMirror</b> est un logiciel open source\n"
                    "de copies de sauvegardes multiplateforme\n"
                    "développé par Stéphane Gaspar  - (2024)\n "
                    "basé sur la bibliothèque Qt et sur 7zip de Igor Pavlov.\n "
-                   "contact : stephane.gaspar@gmail.com -");
+                   "contact : stephane.gaspar@gmail.com \n");
     QString v = tr(" version : %1.%2%3");
     v = v.arg(version[0]).arg(version[1]).arg(version[2]);
-    s.append(v);
 
-    QMessageBox::about(this, "QtMirror", s );
+    msgBox.setText(v);
+    msgBox.setInformativeText(s);
+    msgBox.exec();
 }
 
 void MainWindow::toggleSimul(int s)
@@ -675,17 +677,21 @@ void MainWindow::timerLoop()
     if( m_indexE < m_lines )
     {
         // suivant
-        ui->tableWidget->selectRow(m_indexE);
-        ui->tableWidget->update();
-        mc = m_list[m_indexE];
-        if( m_simul ) mc.wOptions |= SIMULATE;
-        if( m_restore && m_lastAction)RevertToRestore::reRevert(mc, m_lastAction);
-        emit progressChanged2(110);
-        m_lastProgress2 = 0;
-        m_lastProgress3 = (m_indexE * 100) / m_lines;
-        emit progressChanged3(m_lastProgress3);
-        m_scan = new scanner(mc, this);
-        m_scan->start();
+        cb = (QCheckBox*)ui->tableWidget->cellWidget(m_indexE, 0);
+        if( cb->isChecked() )
+        {
+            ui->tableWidget->selectRow(m_indexE);
+            ui->tableWidget->update();
+            mc = m_list[m_indexE];
+            if( m_simul ) mc.wOptions |= SIMULATE;
+            if( m_restore && m_lastAction)RevertToRestore::reRevert(mc, m_lastAction);
+            emit progressChanged2(110);
+            m_lastProgress2 = 0;
+            m_lastProgress3 = (m_indexE * 100) / m_lines;
+            emit progressChanged3(m_lastProgress3);
+            m_scan = new scanner(mc, this);
+            m_scan->start();
+        }
         m_indexE++;
     }
     else
@@ -841,8 +847,14 @@ void MainWindow::restoreImage()
             }
         }
     }
+    // créer logFile
+    QString fileName = QDir::homePath();
+    fileName.append("/QtMirror.log");
+    logFile.setFileName(fileName);
+    logFile.open(QIODevice::ReadWrite);
     DialogListImage *dli = new DialogListImage(fullImageName, this);
     dli->exec();
+    logFile.close();
     return;
 }
 
